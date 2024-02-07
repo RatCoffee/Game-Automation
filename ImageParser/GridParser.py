@@ -27,13 +27,15 @@ def originFromLandmark(name, offset):
     maxLoc = cv.minMaxLoc(scan)[3]
     return tuple(sum(x) for x in zip(maxLoc, offset))
 
-##def originFromGrid(squareSprites, squareSize):
-##    screen = np.array(ImageGrab.grab())
-##    scans = [cv.matchTemplate(screen, tile, 3) for tile in squareSprites]
-##    return scans
-##    maxPoints = [cv.minMaxLoc(scan)[2] for scan in scans]
-##    maxVals = [cv.minMaxLoc(scan)[0] for scan in scans]
-##    return maxPoints, maxVals
+def originFromTiles(tiles):
+    tileSize = tiles[0].shape[0]
+    screen = np.array(ImageGrab.grab())
+    scans = [cv.matchTemplate(screen, tile, 3) for tile in tiles]
+    for scan in scans:
+        
+    maxPoints = [cv.minMaxLoc(scan)[2] for scan in scans]
+    relative = [tuple([i%tileSize for i in t]) for t in maxPoints]
+    return relative
 
 
 # PARSE GRID
@@ -48,4 +50,6 @@ def gridOfSize(tiles, origin, gridSize):
     scans = np.array([cv.matchTemplate(gridScan, tile, 3)[::squareSize,::squareSize]
                       for tile in tiles])
     return np.argmax(scans, axis =0)
+
+
 
