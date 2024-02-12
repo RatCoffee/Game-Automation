@@ -67,23 +67,17 @@ class NeighborInfo:
 # Create a per-cell helper bitboard
 def basic_bitboard(dSize):
     return np.array([[True for i in range(dSize)]]*(dSize**2))
-
-def cell_bitboard(puzzle, nInfo):
-    dSize = digit_size(puzzle)
-    bitboard = basic_bitboard(dSize)
-    for i in range(dSize**2):
-        if puzzle[i] > 0:
-            mask = np.array([puzzle[i] != j+1 for j in range(dSize)])
-            bitboard[i] = np.array([False for i in range(dSize)])
-            for n in nInfo.Neighbors(i):
-                bitboard[n] = np.all((mask, bitboard[n]), axis = 0)
-    return bitboard
-
-class Bitboards:
-    def __init__(self, puzzle, nInfo):
-        self._size = digit_size(puzzle)
-        self._cells = cell_bitboard(puzzle, nInfo)
         
+def to_rowboard(dSize, bitboard):
+    return np.concatenate(tuple(np.swapaxes(coords[i*dSize:(i+1)*dSize,:], 0,1)
+                                for i in range(dSize)))
+
+def to_columnboard(dSize, bitboard):
+    return np.concatenate(tuple(np.swapaxes(coords[i::dSize,:], 0,1)
+                                for i in range(dSize)))
+
+def to_blockboard(dSize, bitboard, blockmap):
+    pass
 
 # PUZZLE IMPORT
 ############################################################################
@@ -94,14 +88,15 @@ def puzzle_from_string(cluestring):
 # TODO: Non-Regular puzzle shapes
 
 
-
-
 if __name__ == "__main__":
     import time
     puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
-
-    start = time.time()
+    
     dSize = 0
+    solved = 0
+    
+    start = time.time()
+    
     for puzzleString in puzzles:
         # Import the Puzzle
         puzzle = puzzle_from_string(puzzleString)
@@ -110,6 +105,9 @@ if __name__ == "__main__":
         if dSize != digit_size(puzzle):
             dSize = digit_size(puzzle)
             nInfo = NeighborInfo(dSize)
+
+        #TODO: Solve
         
-    print(time.time() - start)
+    print("run time:", time.time() - start)
+    print("solved: %d/%d"%(solved, len(puzzles)))
     input()
