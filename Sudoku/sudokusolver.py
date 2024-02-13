@@ -121,13 +121,19 @@ def naked_singles(puzzle, dSize, nInfo, bitboard):
 def is_solved(puzzle):
     return 0 not in puzzle
 
+SOLVE_METHODS = [naked_singles]
+
 # Iteratively solve the puzzlet
 def iter_solve(puzzle, dSize, nInfo):
     bitboard = basic_bitboard(dSize)
     rSolved = init_bitboard(puzzle, dSize, nInfo, bitboard)
     while not is_solved(puzzle) and rSolved > 0:
-        rSolved = naked_singles(puzzle, dSize, nInfo, bitboard)
-    return puzzle if is_solved(puzzle) else None
+        rSolved = 0
+        for method in SOLVE_METHODS:
+            rSolved = method(puzzle, dSize, nInfo, bitboard)
+            if rSolved > 0:
+                continue
+    return is_solved(puzzle)
     
     
 
@@ -149,17 +155,16 @@ if __name__ == "__main__":
     nInfo = NeighborInfo(dSize)
     
     for e, puzzleString in enumerate(puzzles):
-        if e<100:
-            # Import the Puzzle
-            puzzle = puzzle_from_string(puzzleString)
+        # Import the Puzzle
+        puzzle = puzzle_from_string(puzzleString)
 
-            # Set up NeighborInfo if the puzzle shape has changed
-            if dSize != digit_size(puzzle):
-                dSize = digit_size(puzzle)
-                nInfo = NeighborInfo(dSize)
+        # Set up NeighborInfo if the puzzle shape has changed
+        if dSize != digit_size(puzzle):
+            dSize = digit_size(puzzle)
+            nInfo = NeighborInfo(dSize)
 
-            if type(iter_solve(puzzle, dSize, nInfo)) != type(None):
-                solved += 1
+        if iter_solve(puzzle, dSize, nInfo):
+            solved += 1
         
     print("run time:", time.time() - start)
     print("solved: %d/%d"%(solved, len(puzzles)))
