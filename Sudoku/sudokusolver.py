@@ -117,11 +117,46 @@ def naked_singles(puzzle, dSize, nInfo, bitboard):
             update_square(i, puzzle, dSize, nInfo, bitboard)
     return count - np.sum(bitboard)
 
+# Find hidden singles
+def hidden_singles(puzzle, dSize, nInfo, bitboard):
+    count = np.sum(bitboard)
+    
+    rowboard = to_rowboard(dSize, bitboard)
+    for i in range(len(puzzle)):
+        if np.sum(rowboard[i]) == 1:
+            index = (i//dSize)*dSize + np.where(rowboard[i] == True)[0][0]
+            puzzle[index] = i%dSize + 1
+            update_square(index, puzzle, dSize, nInfo, bitboard)
+            rowboard = to_rowboard(dSize, bitboard)
+    
+    columnboard = to_columnboard(dSize, bitboard)
+    for i in range(len(puzzle)):
+        if np.sum(columnboard[i]) == 1:
+            index = i//dSize + np.where(columnboard[i] == True)[0][0]*dSize
+            puzzle[index] = i%dSize + 1
+            update_square(index, puzzle, dSize, nInfo, bitboard)
+            columnboard = to_columnboard(dSize, bitboard)
+
+    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+    for i in range(len(puzzle)):
+        if np.sum(blockboard[i]) == 1:
+            print(puzzle)
+            index = nInfo._blockNeighbors[i//dSize,
+                                np.where(blockboard[i] == True)[0][0]]
+            print(index)
+            puzzle[index] = i%dSize + 1
+            update_square(index, puzzle, dSize, nInfo, bitboard)
+            blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+            print(puzzle)
+            print()
+            
+    return count - np.sum(bitboard)
+
 # Determine if the puzzle has been solved
 def is_solved(puzzle):
     return 0 not in puzzle
 
-SOLVE_METHODS = [naked_singles]
+SOLVE_METHODS = [naked_singles, hidden_singles]
 
 # Iteratively solve the puzzlet
 def iter_solve(puzzle, dSize, nInfo):
@@ -135,7 +170,6 @@ def iter_solve(puzzle, dSize, nInfo):
                 continue
     return is_solved(puzzle)
     
-    
 
 if __name__ == "__main__":
     import time
@@ -147,12 +181,18 @@ if __name__ == "__main__":
     
     dSize = 0
     solved = 0
+
+##    puzzle = puzzle_from_string(puzzles[0])
+##    dSize = digit_size(puzzle)
+##    nInfo = NeighborInfo(dSize)
+####    bboard = basic_bitboard(dSize)
+####    init_bitboard(puzzle, dSize, nInfo, bboard)
+####    print(bboard)
+####    print()
+####    print(to_columnboard(dSize, bboard))
+##    print(np.reshape(iter_solve(puzzle, dSize, nInfo), (4,4)))
     
     start = time.time()
-
-    puzzle = puzzle_from_string(puzzles[0])
-    dSize = digit_size(puzzle)
-    nInfo = NeighborInfo(dSize)
     
     for e, puzzleString in enumerate(puzzles):
         # Import the Puzzle
