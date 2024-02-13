@@ -69,15 +69,16 @@ def basic_bitboard(dSize):
     return np.array([[True for i in range(dSize)]]*(dSize**2))
         
 def to_rowboard(dSize, bitboard):
-    return np.concatenate(tuple(np.swapaxes(coords[i*dSize:(i+1)*dSize,:], 0,1)
+    return np.concatenate(tuple(np.swapaxes(bitboard[i*dSize:(i+1)*dSize,:], 0,1)
                                 for i in range(dSize)))
 
 def to_columnboard(dSize, bitboard):
-    return np.concatenate(tuple(np.swapaxes(coords[i::dSize,:], 0,1)
+    return np.concatenate(tuple(np.swapaxes(bitboard[i::dSize,:], 0,1)
                                 for i in range(dSize)))
 
 def to_blockboard(dSize, bitboard, blockmap):
-    pass
+    return np.concatenate(tuple(np.swapaxes(np.concatenate(
+        tuple([bitboard[i:i+1,:] for i in block])), 0, 1) for block in blockmap))
 
 # PUZZLE IMPORT
 ############################################################################
@@ -91,6 +92,9 @@ def puzzle_from_string(cluestring):
 if __name__ == "__main__":
     import time
     puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
+
+##    bb = np.array([["%s %d"%(p, i) for i in range(4)]
+##                   for p in itertools.product(range(4), repeat=2)])
     
     dSize = 0
     solved = 0
