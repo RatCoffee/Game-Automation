@@ -72,16 +72,14 @@ def basic_bitboard(dSize):
     return np.array([[True for i in range(dSize)]]*(dSize**2))
         
 def to_rowboard(dSize, bitboard):
-    return np.concatenate(tuple(np.swapaxes(bitboard[i*dSize:(i+1)*dSize,:],
-                                            0,1) for i in range(dSize)))
+    return np.array([bitboard[i*dSize:(i+1)*dSize,:] for i in range(dSize)])
 
 def to_columnboard(dSize, bitboard):
-    return np.concatenate(tuple(np.swapaxes(bitboard[i::dSize,:], 0,1)
-                                for i in range(dSize)))
+    return np.array([bitboard[i::dSize,:] for i in range(dSize)])
 
 def to_blockboard(dSize, bitboard, blockmap):
-    return np.concatenate(tuple(np.swapaxes(np.concatenate(
-        tuple([bitboard[i:i+1,:] for i in block])), 0, 1) for block in blockmap))
+    return np.array([np.concatenate(tuple([bitboard[i:i+1,:]for i in block]))
+                     for block in blockmap])
 
 # PUZZLE IMPORT
 ################################################################################
@@ -122,33 +120,31 @@ def hidden_singles(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
     
     rowboard = to_rowboard(dSize, bitboard)
-    for i in range(len(puzzle)):
-        if np.sum(rowboard[i]) == 1:
-            index = (i//dSize)*dSize + np.where(rowboard[i] == True)[0][0]
-            puzzle[index] = i%dSize + 1
+    for y, x in itertools.product(range(dSize), repeat=2):
+        if np.sum(rowboard[y, x]) == 1:
+            val = np.where(rowboard[y, x] == True)[0][0]+1
+            index = y*dSize+x
+            puzzle[index] = val
             update_square(index, puzzle, dSize, nInfo, bitboard)
             rowboard = to_rowboard(dSize, bitboard)
     
     columnboard = to_columnboard(dSize, bitboard)
-    for i in range(len(puzzle)):
-        if np.sum(columnboard[i]) == 1:
-            index = i//dSize + np.where(columnboard[i] == True)[0][0]*dSize
-            puzzle[index] = i%dSize + 1
+    for x, y in itertools.product(range(dSize), repeat=2):
+        if np.sum(columnboard[x, y]) == 1:
+            val = np.where(columnboard[x, y] == True)[0][0]+1
+            index = y*dSize+x
+            puzzle[index] = val
             update_square(index, puzzle, dSize, nInfo, bitboard)
             columnboard = to_columnboard(dSize, bitboard)
 
     blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
-    for i in range(len(puzzle)):
-        if np.sum(blockboard[i]) == 1:
-            print(puzzle)
-            index = nInfo._blockNeighbors[i//dSize,
-                                np.where(blockboard[i] == True)[0][0]]
-            print(index)
-            puzzle[index] = i%dSize + 1
+    for block, inblock in itertools.product(range(dSize), repeat=2):
+        if np.sum(blockboard[block, inblock]) == 1:
+            val = np.where(blockboard[block,inblock] == True)[0][0] +1
+            index = nInfo._blockNeighbors[block, inblock]
+            puzzle[index] = val
             update_square(index, puzzle, dSize, nInfo, bitboard)
             blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
-            print(puzzle)
-            print()
             
     return count - np.sum(bitboard)
 
@@ -156,7 +152,7 @@ def hidden_singles(puzzle, dSize, nInfo, bitboard):
 def is_solved(puzzle):
     return 0 not in puzzle
 
-SOLVE_METHODS = [naked_singles, hidden_singles]
+SOLVE_METHODS = [naked_singles, hidden_singles] 
 
 # Iteratively solve the puzzlet
 def iter_solve(puzzle, dSize, nInfo):
@@ -165,9 +161,9 @@ def iter_solve(puzzle, dSize, nInfo):
     while not is_solved(puzzle) and rSolved > 0:
         rSolved = 0
         for method in SOLVE_METHODS:
-            rSolved = method(puzzle, dSize, nInfo, bitboard)
+            rSolved += method(puzzle, dSize, nInfo, bitboard)
             if rSolved > 0:
-                continue
+                break
     return is_solved(puzzle)
     
 
@@ -185,12 +181,14 @@ if __name__ == "__main__":
 ##    puzzle = puzzle_from_string(puzzles[0])
 ##    dSize = digit_size(puzzle)
 ##    nInfo = NeighborInfo(dSize)
-####    bboard = basic_bitboard(dSize)
-####    init_bitboard(puzzle, dSize, nInfo, bboard)
-####    print(bboard)
-####    print()
-####    print(to_columnboard(dSize, bboard))
-##    print(np.reshape(iter_solve(puzzle, dSize, nInfo), (4,4)))
+##    bboard = basic_bitboard(dSize)
+##    init_bitboard(puzzle, dSize, nInfo, bboard)
+##    print(puzzle)
+##    print(bboard)
+##    print()
+##    print(to_blockboard(dSize, bboard, nInfo._blockNeighbors))
+##    iter_solve(puzzle, dSize, nInfo)
+##    print(puzzle)
     
     start = time.time()
     
