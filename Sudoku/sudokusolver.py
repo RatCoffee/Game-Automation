@@ -108,6 +108,7 @@ def init_bitboard(puzzle, dSize, nInfo, bitboard):
 
 # Find naked singles
 def naked_singles(puzzle, dSize, nInfo, bitboard):
+    print("Naked Singles")
     count = np.sum(bitboard)
     for i in range(len(puzzle)):
         if np.sum(bitboard[i]) == 1:
@@ -117,6 +118,7 @@ def naked_singles(puzzle, dSize, nInfo, bitboard):
 
 # Find hidden singles
 def hidden_singles(puzzle, dSize, nInfo, bitboard):
+    print("Hidden Singles")
     count = np.sum(bitboard)
     
     rowboard = to_rowboard(dSize, bitboard)
@@ -148,23 +150,75 @@ def hidden_singles(puzzle, dSize, nInfo, bitboard):
             
     return count - np.sum(bitboard)
 
+# Find naked pairs
+def naked_pairs(puzzle, dSize, nInfo, bitboard):
+    count = np.sum(bitboard)
+    
+    rowboard = to_rowboard(dSize, bitboard)
+    for y in range(dSize):
+        for i, j in itertools.combinations(range(dSize), 2):
+            if np.array_equal(rowboard[y,i], rowboard[y,j]) and np.sum(rowboard[y,i]) == 2:
+                mask = np.logical_not(rowboard[y,i])
+                print(mask)
+                for x in range(dSize):
+                    if x!=i and x!=j:
+                        bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+            rowboard = to_rowboard(dSize, bitboard)
+
+    columnboard = to_columnboard(dSize, bitboard)
+    for x in range(dSize):
+        for i, j in itertools.combinations(range(dSize), 2):
+            if np.array_equal(columnboard[x,i], columnboard[x,j]) and np.sum(columnboard[x,i]) == 2:
+                mask = np.logical_not(columnboard[x,i])
+                print(mask)
+                for y in range(dSize):
+                    if y!=i and y!=j:
+                        bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+                columnboard = to_columnboard(dSize, bitboard)
+
+    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+    for b in range(dSize):
+        for i, j in itertools.combinations(range(dSize), 2):
+            if np.array_equal(blockboard[b,i], blockboard[b,j]) and np.sum(blockboard[b,i]) == 2:
+                mask = np.logical_not(blockboard[b,i])
+                print(mask)
+                for n in range(dSize):
+                    if n!=i and n!=j:
+                        index = nInfo._blockNeighbors[b, n]
+                        bitboard[index] = np.logical_and(mask, bitboard[index])
+                blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors) 
+            
+    return count - np.sum(bitboard)
+
+
+
+
 # Determine if the puzzle has been solved
 def is_solved(puzzle):
     return 0 not in puzzle
 
-SOLVE_METHODS = [naked_singles, hidden_singles] 
+SOLVE_METHODS = [naked_singles, hidden_singles] #, naked_pairs
 
 # Iteratively solve the puzzlet
 def iter_solve(puzzle, dSize, nInfo):
     bitboard = basic_bitboard(dSize)
     rSolved = init_bitboard(puzzle, dSize, nInfo, bitboard)
+    iterCount = 0
     while not is_solved(puzzle) and rSolved > 0:
+        iterCount += 1
         rSolved = 0
         for method in SOLVE_METHODS:
             rSolved += method(puzzle, dSize, nInfo, bitboard)
             if rSolved > 0:
                 break
-    return is_solved(puzzle)
+        print("Itercount:", iterCount)
+        print(np.reshape(puzzle, (dSize, dSize)))
+    print(bitboard)
+    print(to_rowboard(dSize, bitboard))
+    print('\n')
+    print(to_columnboard(dSize, bitboard))
+    print('\n')
+    print(to_blockboard(dSize, bitboard,nInfo._blockNeighbors)) 
     
 
 if __name__ == "__main__":
@@ -177,33 +231,37 @@ if __name__ == "__main__":
     
     dSize = 0
     solved = 0
-
-##    puzzle = puzzle_from_string(puzzles[0])
-##    dSize = digit_size(puzzle)
-##    nInfo = NeighborInfo(dSize)
-##    bboard = basic_bitboard(dSize)
-##    init_bitboard(puzzle, dSize, nInfo, bboard)
-##    print(puzzle)
+    printed = False
+    puzzle = puzzle_from_string(puzzles[3000])
+    dSize = digit_size(puzzle)
+    nInfo = NeighborInfo(dSize)
+    bboard = basic_bitboard(dSize)
+    init_bitboard(puzzle, dSize, nInfo, bboard)
+    print(np.reshape(puzzle, (dSize, dSize)))
 ##    print(bboard)
 ##    print()
-##    print(to_blockboard(dSize, bboard, nInfo._blockNeighbors))
-##    iter_solve(puzzle, dSize, nInfo)
-##    print(puzzle)
+    iter_solve(puzzle, dSize, nInfo)
+    print(np.reshape(puzzle, (dSize, dSize)))
     
-    start = time.time()
-    
-    for e, puzzleString in enumerate(puzzles):
-        # Import the Puzzle
-        puzzle = puzzle_from_string(puzzleString)
-
-        # Set up NeighborInfo if the puzzle shape has changed
-        if dSize != digit_size(puzzle):
-            dSize = digit_size(puzzle)
-            nInfo = NeighborInfo(dSize)
-
-        if iter_solve(puzzle, dSize, nInfo):
-            solved += 1
-        
-    print("run time:", time.time() - start)
-    print("solved: %d/%d"%(solved, len(puzzles)))
-    input()
+##    start = time.time()
+##    
+##    for e, puzzleString in enumerate(puzzles):
+##        # Import the Puzzle
+##        puzzle = puzzle_from_string(puzzleString)
+##
+##        # Set up NeighborInfo if the puzzle shape has changed
+##        if dSize != digit_size(puzzle):
+##            dSize = digit_size(puzzle)
+##            nInfo = NeighborInfo(dSize)
+##
+##        iter_solve(puzzle, dSize, nInfo)
+##        if is_solved(puzzle):
+##            solved += 1
+##        elif not printed:
+##            print(np.reshape(puzzle, (dSize, dSize)))
+##            print(np.reshape(nInfo._blockNeighbors,(dSize, dSize)))
+##            printed = True
+##        
+##    print("run time:", time.time() - start)
+##    print("solved: %d/%d"%(solved, len(puzzles)))
+##    input()
