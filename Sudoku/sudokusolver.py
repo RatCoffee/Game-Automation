@@ -223,33 +223,33 @@ if __name__ == "__main__":
     dSize = 0
     solved = 0
 
-    puzzle = puzzle_from_string(puzzles[3000])
-    dSize = digit_size(puzzle)
-    print(np.reshape(puzzle, (dSize, dSize)))
-    nInfo = NeighborInfo(dSize)
-    bboard = basic_bitboard(dSize)
-    print(iter_solve(puzzle, dSize, nInfo))
-    print(np.reshape(puzzle, (dSize, dSize)))
+##    puzzle = puzzle_from_string(puzzles[3000])
+##    dSize = digit_size(puzzle)
+##    print(np.reshape(puzzle, (dSize, dSize)))
+##    nInfo = NeighborInfo(dSize)
+##    bboard = basic_bitboard(dSize)
+##    print(iter_solve(puzzle, dSize, nInfo))
+##    print(np.reshape(puzzle, (dSize, dSize)))
     
-##    start = time.time()
-##    
-##    for e, puzzleString in enumerate(puzzles):
-##        # Import the Puzzle
-##        puzzle = puzzle_from_string(puzzleString)
-##
-##        # Set up NeighborInfo if the puzzle shape has changed
-##        if dSize != digit_size(puzzle):
-##            dSize = digit_size(puzzle)
-##            nInfo = NeighborInfo(dSize)
-##
-##        bboard = iter_solve(puzzle, dSize, nInfo)
-##        if is_solved(puzzle):
-##            solved += 1
-##        elif not printed:
-##            print(np.reshape(puzzle, (dSize, dSize)))
-##            print(bboard)
-##            printed = True
-##        
-##    print("run time:", time.time() - start)
-##    print("solved: %d/%d"%(solved, len(puzzles)))
-##    input()
+    start = time.time()
+    
+    for e, puzzleString in enumerate(puzzles):
+        # Import the Puzzle
+        puzzle = puzzle_from_string(puzzleString)
+
+        # Set up NeighborInfo if the puzzle shape has changed
+        if dSize != digit_size(puzzle):
+            dSize = digit_size(puzzle)
+            nInfo = NeighborInfo(dSize)
+
+        bboard = iter_solve(puzzle, dSize, nInfo)
+        if is_solved(puzzle):
+            solved += 1
+        elif not printed:
+            print(np.reshape(puzzle, (dSize, dSize)))
+            print(bboard)
+            printed = True
+        
+    print("run time:", time.time() - start)
+    print("solved: %d/%d"%(solved, len(puzzles)))
+    input()
