@@ -189,7 +189,6 @@ def naked_pairs(puzzle, dSize, nInfo, bitboard):
             
     return count - np.sum(bitboard)
 
-
 # Find hidden pairs
 # TODO: Adapt this to idenitfy hidden tuples of many sizes
 def hidden_pairs(puzzle, dSize, nInfo, bitboard):
@@ -228,6 +227,48 @@ def hidden_pairs(puzzle, dSize, nInfo, bitboard):
             
     return count - np.sum(bitboard)
 
+# Find pointing pairs
+def pointing_pairs(puzzle, dSize, nInfo, bitboard):
+    count = np.sum(bitboard)
+    
+    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+    for b in range(dSize):
+        for v in range(dSize):
+            if np.sum(blockboard[b,:,v]) == 2:
+                ix = np.array([nInfo._blockNeighbors[b,n] for n in np.where(blockboard[b,:,v])[0]])
+                if len(np.unique(ix//dSize)) == 1:
+                    mask = np.array([i != v for i in range(dSize)])
+                    y = (ix//dSize)[0]
+                    for x in range(dSize):
+                        index = y*dSize + x
+                        if index not in nInfo._blockNeighbors[b]:
+                            bitboard[index] = np.logical_and(mask, bitboard[index])
+                elif len(np.unique(ix%dSize)) == 1:
+                    mask = np.array([i != v for i in range(dSize)])
+                    x = (ix%dSize)[0]
+                    for y in range(dSize):
+                        index = y*dSize + x
+                        if index not in nInfo._blockNeighbors[b]:
+                            bitboard[index] = np.logical_and(mask, bitboard[index])
+
+    return count - np.sum(bitboard)
+
+#Algorithms TODO:
+################################################################
+#Pointing Pairs (Pointing Tuples)
+    #If a specific box has one digit confined to a specific line,
+    #that digit cannot be in that line in any other box
+#Box Line Reduction
+    #If, within a line, a specific digit can only be in one box
+    #that digit cannot be in that box for any other line
+################################################################
+#X-Wing
+#Coloring
+#Y-Wing
+#Rectangle Elimination
+#Swordfish
+#XYZ-Wing
+#BUG
 
 # Determine if the puzzle has been solved
 def is_solved(puzzle):
@@ -246,13 +287,14 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles, naked_pairs, hidden_pairs]
-#naked_singles, hidden_singles, naked_pairs, hidden_pairs
+SOLVE_METHODS = [naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_pairs]
+#naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_pairs
 
 # Iteratively solve the puzzlet
 def iter_solve(puzzle, dSize, nInfo):
     bitboard = basic_bitboard(dSize)
     rSolved = init_bitboard(puzzle, dSize, nInfo, bitboard)
+
     while not is_solved(puzzle) and rSolved > 0:
         rSolved = 0
         for method in SOLVE_METHODS:
@@ -268,7 +310,7 @@ if __name__ == "__main__":
     dSize = 0
     solved = [0] * math.ceil(len(puzzles)/1000)
 
-##    puzzle = puzzle_from_string('000000000000020000001000002000010000')
+##    puzzle = puzzle_from_string(puzzles[0])
 ##    dSize = digit_size(puzzle)
 ##    print(np.reshape(puzzle, (dSize, dSize)))
 ##    nInfo = NeighborInfo(dSize)
@@ -277,6 +319,8 @@ if __name__ == "__main__":
     
     start = time.time()
     for e, clueString in enumerate(puzzles):
+        if e%1000 == 999:
+            print(e+1)
         # Import the Puzzle
         puzzle = puzzle_from_string(clueString)
 
