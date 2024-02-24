@@ -228,30 +228,29 @@ def hidden_pairs(puzzle, dSize, nInfo, bitboard):
     return count - np.sum(bitboard)
 
 # Find pointing pairs
-def pointing_pairs(puzzle, dSize, nInfo, bitboard):
+def pointing_digits(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
     
     blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
     for b in range(dSize):
         for v in range(dSize):
-            if np.sum(blockboard[b,:,v]) == 2:
-                ix = np.array([nInfo._blockNeighbors[b,n] for n in np.where(blockboard[b,:,v])[0]])
-                if len(np.unique(ix//dSize)) == 1:
-                    mask = np.array([i != v for i in range(dSize)])
-                    y = (ix//dSize)[0]
-                    for x in range(dSize):
-                        index = y*dSize + x
-                        if index not in nInfo._blockNeighbors[b]:
-                            bitboard[index] = np.logical_and(mask, bitboard[index])
-                elif len(np.unique(ix%dSize)) == 1:
-                    mask = np.array([i != v for i in range(dSize)])
-                    x = (ix%dSize)[0]
-                    for y in range(dSize):
-                        index = y*dSize + x
-                        if index not in nInfo._blockNeighbors[b]:
-                            bitboard[index] = np.logical_and(mask, bitboard[index])
+            ix = np.array([nInfo._blockNeighbors[b,n] for n in np.where(blockboard[b,:,v])[0]])
+            if len(np.unique(ix//dSize)) == 1:
+                mask = np.array([i != v for i in range(dSize)])
+                y = (ix//dSize)[0]
+                for x in range(dSize):
+                    index = y*dSize + x
+                    if index not in nInfo._blockNeighbors[b]:
+                        bitboard[index] = np.logical_and(mask, bitboard[index])
+            elif len(np.unique(ix%dSize)) == 1:
+                mask = np.array([i != v for i in range(dSize)])
+                x = (ix%dSize)[0]
+                for y in range(dSize):
+                    index = y*dSize + x
+                    if index not in nInfo._blockNeighbors[b]:
+                        bitboard[index] = np.logical_and(mask, bitboard[index])
 
-    return count - np.sum(bitboard)
+   return count - np.sum(bitboard)
 
 #Algorithms TODO:
 ################################################################
@@ -277,6 +276,7 @@ def is_solved(puzzle):
 #TODO: Verify Solution as Valid
 def valid_solution(clueString, puzzle):
     refPuzzle = puzzle_from_string(clueString)
+
     dSize = digit_size(refPuzzle)
     if 0 in puzzle:
         return False
@@ -287,7 +287,7 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_pairs]
+SOLVE_METHODS = [naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_digits]
 #naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_pairs
 
 # Iteratively solve the puzzlet
@@ -309,14 +309,7 @@ if __name__ == "__main__":
 
     dSize = 0
     solved = [0] * math.ceil(len(puzzles)/1000)
-
-##    puzzle = puzzle_from_string(puzzles[0])
-##    dSize = digit_size(puzzle)
-##    print(np.reshape(puzzle, (dSize, dSize)))
-##    nInfo = NeighborInfo(dSize)
-##    print(iter_solve(puzzle, dSize, nInfo))
-##    print(np.reshape(puzzle, (dSize, dSize)))
-    
+    times = [0] * math.ceil(len(puzzles)/1000)    
     start = time.time()
     for e, clueString in enumerate(puzzles):
         if e%1000 == 999:
@@ -332,8 +325,6 @@ if __name__ == "__main__":
         bboard = iter_solve(puzzle, dSize, nInfo)
         if valid_solution(clueString, puzzle):
             solved[e//1000] += 1
-##        else:
-##            print(e)
         
     print("run time:", time.time() - start)
     print("solved: %s"%solved)
