@@ -1,96 +1,77 @@
-import numpy as np
-import itertools
 
-### Find naked tuples
-### TODO: Adapt this to idenitfy naked tuples of many sizes
-def naked_tuples(puzzle, dSize, nInfo, bitboard):
+
+# Find naked pairs
+# TODO: Adapt this to idenitfy naked tuples of many sizes
+def naked_pairs(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = min(dSize//2 + 1, 4)
+    
+    rowboard = to_rowboard(dSize, bitboard)
+    for y in range(dSize):
+        for i, j in itertools.combinations(range(dSize), 2):
+            if np.array_equal(rowboard[y,i], rowboard[y,j]) and np.sum(rowboard[y,i]) == 2:
+                mask = np.logical_not(rowboard[y,i])
+                for x in range(dSize):
+                    if x!=i and x!=j:
+                        bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+            rowboard = to_rowboard(dSize, bitboard)
 
-    for tupleSize in range(2, maxSize):
-        rowboard = to_rowboard(dSize, bitboard)
-        for y in range(dSize):
-            for t in itertools.combinations(range(dSize), tupleSize):
-                intersection = np.any(tuple(rowboard[y, x] for x in t), axis = 0)
-                if np.sum(intersection) == tupleSize:
-                    mask = np.logical_not(intersection)
-                    for x in range(dSize):
-                        if x not in t:
-                            bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
-                rowboard = to_rowboard(dSize, bitboard)
-
-        columnboard = to_columnboard(dSize, bitboard)
-        for x in range(dSize):
-            for t in itertools.combinations(range(dSize), tupleSize):
-                intersection = np.any(tuple(columnboard[x, y] for y in t), axis = 0)
-                if np.sum(intersection) == tupleSize:
-                    mask = np.logical_not(intersection)
-                    for y in range(dSize):
-                        if y not in t:
-                            bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+    columnboard = to_columnboard(dSize, bitboard)
+    for x in range(dSize):
+        for i, j in itertools.combinations(range(dSize), 2):
+            if np.array_equal(columnboard[x,i], columnboard[x,j]) and np.sum(columnboard[x,i]) == 2:
+                mask = np.logical_not(columnboard[x,i])
+                for y in range(dSize):
+                    if y!=i and y!=j:
+                        bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
                 columnboard = to_columnboard(dSize, bitboard)
 
-        blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
-        for b in range(dSize):
-            for t in itertools.combinations(range(dSize), tupleSize):
-                intersection = np.any(tuple(blockboard[b, n] for n in t), axis = 0)
-                if np.sum(intersection) == tupleSize:
-                    mask = np.logical_not(intersection)
-                    for n in range(dSize):
-                        if n not in t:
-                            index = nInfo._blockNeighbors[b, n]
-                            bitboard[index] = np.logical_and(mask, bitboard[index])
-                blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
-
-        if np.sum(bitboard) < count:
-            return count - np.sum(bitboard)
+    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+    for b in range(dSize):
+        for i, j in itertools.combinations(range(dSize), 2):
+            if np.array_equal(blockboard[b,i], blockboard[b,j]) and np.sum(blockboard[b,i]) == 2:
+                mask = np.logical_not(blockboard[b,i])
+                for n in range(dSize):
+                    if n!=i and n!=j:
+                        index = nInfo._blockNeighbors[b, n]
+                        bitboard[index] = np.logical_and(mask, bitboard[index])
+                blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors) 
             
     return count - np.sum(bitboard)
-
 
 # Find hidden pairs
 # TODO: Adapt this to idenitfy hidden tuples of many sizes
-def hidden_tuples(puzzle, dSize, nInfo, bitboard):
+def hidden_pairs(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = min(dSize//2 + 1, 4)
+    
+    rowboard = to_rowboard(dSize, bitboard)
+    for y in range(dSize):
+        for u, v in itertools.combinations(range(dSize), 2):
+            if np.array_equal(rowboard[y,:,u], rowboard[y,:,v]) and np.sum(rowboard[y,:,u]) == 2:
+                mask = np.array([i in (u,v) for i in range(dSize)])
+                for x in range(dSize):
+                    if rowboard[y,x,u]:
+                        bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+            rowboard = to_rowboard(dSize, bitboard)
 
+    columnboard = to_columnboard(dSize, bitboard)
+    for x in range(dSize):
+        for u, v in itertools.combinations(range(dSize), 2):
+            if np.array_equal(columnboard[x,:,u], columnboard[x,:,v]) and np.sum(columnboard[x,:,u]) == 2:
+                mask = np.array([i in (u,v) for i in range(dSize)])
+                for y in range(dSize):
+                    if columnboard[x,y,u]:
+                        bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+                columnboard = to_columnboard(dSize, bitboard)
 
-    for tupleSize in range(2, maxSize):
-        
-        rowboard = to_rowboard(dSize, bitboard)
-        for y in range(dSize):
-            for t in itertools.combinations(range(dSize), tupleSize):
-                union = np.any(tuple(rowboard[y,:,v] for v in t), axis = 0)
-                if np.sum(union) == tupleSize and False not in [np.any(rowboard[y,:,v]) for v in t]:
-                    mask = np.array([i in t for i in range(dSize)])
-                    for x in range(dSize):
-                        if union[x]:
-                            bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
-                rowboard = to_rowboard(dSize, bitboard)
-
-        columnboard = to_columnboard(dSize, bitboard)
-        for x in range(dSize):
-            for t in itertools.combinations(range(dSize), tupleSize):
-                union = np.any(tuple(columnboard[x,:,v] for v in t), axis = 0)
-                if np.sum(union) == tupleSize and False not in [np.any(columnboard[x,:,v]) for v in t]:
-                    mask = np.array([i in t for i in range(dSize)])
-                    for y in range(dSize):
-                        if union[y]:
-                            bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
-                    columnboard = to_columnboard(dSize, bitboard)
-
-        blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
-        for b in range(dSize):
-            for t in itertools.combinations(range(dSize), tupleSize):
-                union = np.any(tuple(blockboard[b,:,v] for v in t), axis = 0)
-                if np.sum(union) == tupleSize and False not in [np.any(blockboard[b,:,v]) for v in t]:
-                    mask = np.array([i in t for i in range(dSize)])
-                    for n in range(dSize):
-                        if union[n]:
-                            index = nInfo._blockNeighbors[b, n]
-                            bitboard[index] = np.logical_and(mask, bitboard[index])
-                    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors) 
+    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+    for b in range(dSize):
+        for u, v in itertools.combinations(range(dSize), 2):
+            if np.array_equal(blockboard[b,:,u], blockboard[b,:,v]) and np.sum(blockboard[b,:,u]) == 2:
+                mask = np.array([i in (u,v) for i in range(dSize)])
+                for n in range(dSize):
+                    if blockboard[b,n,u]:
+                        index = nInfo._blockNeighbors[b, n]
+                        bitboard[index] = np.logical_and(mask, bitboard[index])
+                blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors) 
             
     return count - np.sum(bitboard)
-
-
