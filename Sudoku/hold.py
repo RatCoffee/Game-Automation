@@ -1,13 +1,35 @@
-dSize = 4
-tupleSize = 3
-y = 0
-for t in itertools.combinations(range(dSize), tupleSize):
-    intersection = np.any(tuple(rowboard[x] for x in t), axis = 0)
-    if np.sum(intersection) == tupleSize and np.sum(intersection) > 0:
-        mask = np.logical_not(intersection)
-        for x in range(dSize):
-            if x not in t:
-                rowboard[x] = np.logical_and(mask,rowboard[x])
+import numpy as np
+import itertools
+
+def to_rowboard(dSize, bitboard):
+    return np.array([bitboard[i*dSize:(i+1)*dSize,:] for i in range(dSize)])
+
+
+bitboard = np.array([[True, True, False],
+                     [True, True, False],
+                     [True, True, True],
+                     [True, False, True],
+                     [True, True, True],
+                     [True, False, True],
+                     [False, False, False],
+                     [True, True, True],
+                     [False, True, True]])
+
+dSize = 3
+tupleSize = 2
+rowboard = to_rowboard(dSize, bitboard)
+for y in range(dSize):
+    for t in itertools.combinations(range(dSize), tupleSize):
+        union = np.any(tuple(rowboard[y,x] for x in t), axis = 0)
+        #Make sure you're only unionizing living cells
+        if np.sum(union) == tupleSize and 0 not in [np.sum(rowboard[y,x]) for x in t]:
+            print(y, t)
+            mask = np.logical_not(union)
+            for x in range(dSize):
+                if x not in t:
+                    index = y*dSize + x
+                    bitboard[index] = np.logical_and(mask, bitboard[index])
+            rowboard = to_rowboard(dSize, bitboard)
 print(rowboard)
 
 
@@ -97,19 +119,4 @@ def naked_tuples(puzzle, dSize, nInfo, bitboard):
 ##            
 ##    return count - np.sum(bitboard)
 
-
-
-
-import numpy as np
-import itertools
-
-##rowboard = np.array([[ True,  True, False, False],
-##                     [ True,  True, False, False],
-##                     [ True,  True,  True,  True],
-##                     [ True,  True,  True,  True]])
-
-rowboard = np.array([[ True,  True, False, False],
-                     [ True, False,  True, False],
-                     [False,  True,  True, False],
-                     [ True,  True,  True,  True]])
 

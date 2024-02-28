@@ -253,6 +253,10 @@ def pointing_digits(puzzle, dSize, nInfo, bitboard):
     return count - np.sum(bitboard)
 
 #Algorithms TODO:
+################################################################
+#Pointing Pairs (Pointing Tuples)
+    #If a specific box has one digit confined to a specific line,
+    #that digit cannot be in that line in any other box
 #Box Line Reduction
     #If, within a line, a specific digit can only be in one box
     #that digit cannot be in that box for any other line
@@ -283,7 +287,7 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles]
+SOLVE_METHODS = [naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_digits]
 #naked_singles, hidden_singles, naked_pairs, hidden_pairs, pointing_pairs
 
 # Iteratively solve the puzzlet
