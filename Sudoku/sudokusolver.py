@@ -112,11 +112,12 @@ def init_bitboard(puzzle, dSize, nInfo, bitboard):
 # Find naked singles
 def naked_singles(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    for i in range(len(puzzle)):
+    for i in np.where(puzzle == 0)[0]:
         if np.sum(bitboard[i]) == 1:
             puzzle[i] = np.where(bitboard[i] == True)[0][0]+1
             update_square(i, puzzle, dSize, nInfo, bitboard)
     return count - np.sum(bitboard)
+
 
 # Find hidden singles
 def hidden_singles(puzzle, dSize, nInfo, bitboard):
@@ -327,9 +328,7 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles,
-                 naked_tuples, hidden_tuples,
-                 pointing_digits, box_line_redux]
+SOLVE_METHODS = [naked_singles]
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits
 
 # Iteratively solve the puzzlet
@@ -348,36 +347,36 @@ def iter_solve(puzzle, dSize, nInfo):
 if __name__ == "__main__":
     import time
 
-    example = '032006100410000000000901000500090004060000070300020005000508000000000019007000860'
+##    example = '032006100410000000000901000500090004060000070300020005000508000000000019007000860'
 ##    example = '000030086000020040090078520371856294900142375400397618200703859039205467700904132'
-    puzzle = puzzle_from_string(example)
-    dSize = digit_size(puzzle)
-    nInfo = NeighborInfo(dSize)
-    bboard = iter_solve(puzzle, dSize, nInfo)
-    print(np.reshape(puzzle, (9,9)))
-    print(valid_solution(example, puzzle))
+##    puzzle = puzzle_from_string(example)
+##    dSize = digit_size(puzzle)
+##    nInfo = NeighborInfo(dSize)
+##    bboard = iter_solve(puzzle, dSize, nInfo)
+##    print(np.reshape(puzzle, (9,9)))
+##    print(valid_solution(example, puzzle))
     
-##    puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
-##
-##    dSize = 0
-##    solved = [0] * math.ceil(len(puzzles)/1000)
-##    times = [0] * math.ceil(len(puzzles)/1000)    
-##    start = time.time()
-##    for e, clueString in enumerate(puzzles):
-##        if e%1000 == 999:
-##            print(e+1)
-##        # Import the Puzzle
-##        puzzle = puzzle_from_string(clueString)
-##
-##        # Set up NeighborInfo if the puzzle shape has changed
-##        if dSize != digit_size(puzzle):
-##            dSize = digit_size(puzzle)
-##            nInfo = NeighborInfo(dSize)
-##
-##        bboard = iter_solve(puzzle, dSize, nInfo)
-##        if valid_solution(clueString, puzzle):
-##            solved[e//1000] += 1
-##        
-##    print("run time:", time.time() - start)
-##    print("solved: %s"%solved)
-##    input()
+    puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
+
+    dSize = 0
+    solved = [0] * math.ceil(len(puzzles)/1000)
+    times = [0] * math.ceil(len(puzzles)/1000)    
+    start = time.time()
+    for e, clueString in enumerate(puzzles):
+        if e%1000 == 999:
+            print(e+1)
+        # Import the Puzzle
+        puzzle = puzzle_from_string(clueString)
+
+        # Set up NeighborInfo if the puzzle shape has changed
+        if dSize != digit_size(puzzle):
+            dSize = digit_size(puzzle)
+            nInfo = NeighborInfo(dSize)
+
+        bboard = iter_solve(puzzle, dSize, nInfo)
+        if valid_solution(clueString, puzzle):
+            solved[e//1000] += 1
+        
+    print("run time:", time.time() - start)
+    print("solved: %s"%solved)
+    input()
