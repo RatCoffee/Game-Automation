@@ -341,31 +341,39 @@ def iter_solve(puzzle, dSize, nInfo):
 
 if __name__ == "__main__":
     import time
+    print ("Sudoku Solver Demo")
 
-    size = 1000
-    
-    puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
+    # Easy and Medium puzzles: courtesy of Sudoku Universe Game]
+    # Difficult Named puzzles: courtesy of sudokuwiki.org
 
+    puzzles = [
+("Easy",
+'000000000000003085001020000000507000004000100090000000500000073002010000000040009'
+ ),
+("Medium",
+'100070009008096300050000020010000000940060072000000040030000080004720100200050003'
+),
+("Escargot",
+"100007090030020008009600500005300900010080002600004000300000010041000007007000300"
+),
+("Steering Wheel",
+"000102000060000070008000900400000003050007000200080001009000805070000060000304000"
+),
+("Arto Inkala",
+"800000000003600000070090200050007000000045700000100030001000068008500010090000400"
+)]
     dSize = 0
-    solved = [0] * math.ceil(len(puzzles)/size)
-    times = [None] * math.ceil(len(puzzles)/size)
-    start = time.time()
-    for e, clueString in enumerate(puzzles):
-        # Import the Puzzle
+    for puzzleName, clueString in puzzles:
+        start = time.time()
+        print ("Puzzle", puzzleName)
+        print (clueString)
         puzzle = puzzle_from_string(clueString)
-
-        # Set up NeighborInfo if the puzzle shape has changed
         if dSize != digit_size(puzzle):
             dSize = digit_size(puzzle)
             nInfo = NeighborInfo(dSize)
-
         bboard = iter_solve(puzzle, dSize, nInfo)
-        if valid_solution(clueString, puzzle):
-            solved[e//size] += 1
-        if e%size == size-1:
-            times[e//size] = time.time() - start
-            start = time.time()
-        
-    print("run times:", times)
-    print("solved: %s"%solved)
-    input()
+        if not valid_solution(clueString, puzzle):
+            print("Partial solution")
+        print(puzzle)
+        print("Run time:", time.time()-start)
+        print ("="*80)
