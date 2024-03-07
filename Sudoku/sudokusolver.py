@@ -323,7 +323,7 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles]
+SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits]
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits
 
 # Iteratively solve the puzzlet
