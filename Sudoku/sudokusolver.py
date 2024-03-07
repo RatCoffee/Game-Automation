@@ -341,15 +341,16 @@ def iter_solve(puzzle, dSize, nInfo):
 
 if __name__ == "__main__":
     import time
+
+    size = 1000
     
-    puzzles = [line.strip() for line in open("smallTest.txt", 'r').readlines()]
+    puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
 
     dSize = 0
-    solved = [0] * math.ceil(len(puzzles)/20)
+    solved = [0] * math.ceil(len(puzzles)/size)
+    times = [None] * math.ceil(len(puzzles)/size)
     start = time.time()
     for e, clueString in enumerate(puzzles):
-        if e%1000 == 999:
-            print(e+1)
         # Import the Puzzle
         puzzle = puzzle_from_string(clueString)
 
@@ -360,8 +361,11 @@ if __name__ == "__main__":
 
         bboard = iter_solve(puzzle, dSize, nInfo)
         if valid_solution(clueString, puzzle):
-            solved[e//20] += 1
+            solved[e//size] += 1
+        if e%size == size-1:
+            times[e//size] = time.time() - start
+            start = time.time()
         
-    print("run time:", time.time() - start)
+    print("run times:", times)
     print("solved: %s"%solved)
     input()
