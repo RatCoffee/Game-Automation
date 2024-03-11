@@ -1,9 +1,9 @@
 from sudokusolver import *
 import time
 
-size = 1000
+size = 20
 
-puzzles = [line.strip() for line in open("example.txt", 'r').readlines()]
+puzzles = [line.strip() for line in open("smallTest.txt", 'r').readlines()]
 
 dSize = 0
 solved = [0] * math.ceil(len(puzzles)/size)
@@ -28,4 +28,11 @@ for e, clueString in enumerate(puzzles):
     
 print("run times:", times)
 print("solved: %s"%solved)
+print("total runtime:", sum(times))
 input()
+
+# depth 2 Pre optimization:  93.023 sec
+# depth 3 Pre optimization: 383.154 sec
+
+# depth 2 naked optimization:  15.053 sec
+# depth 3 naked optimization:  53.037 sec

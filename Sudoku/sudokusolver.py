@@ -150,9 +150,9 @@ def hidden_singles(puzzle, dSize, nInfo, bitboard):
 ### Find naked tuples
 def naked_tuples(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = 2#min(dSize//2 + 1, 4)
+    maxSize = 4#min(dSize//2 + 1, 4)
 
-    for tupleSize in range(2, 3):
+    for tupleSize in range(2, maxSize+1):
         rowboard = to_rowboard(dSize, bitboard)
         for y in range(dSize):
             for t in itertools.combinations(range(dSize), tupleSize):
@@ -191,13 +191,63 @@ def naked_tuples(puzzle, dSize, nInfo, bitboard):
 
     return count - np.sum(bitboard)
 
+def naked_rewrite(puzzle, dSize, nInfo, bitboard):
+    count = np.sum(bitboard)
+    maxSize = 3#min(dSize//2, 4)
+
+    for tupleSize in range(2, maxSize+1):
+        rowboard = to_rowboard(dSize, bitboard)
+        for y in range(dSize):
+            cellCounts = np.sum(rowboard[y], axis=1)
+            blips = np.where(((cellCounts <= tupleSize) & (cellCounts > 0)))
+            
+            for t in itertools.combinations(blips, tupleSize):
+                union = np.any(tuple(rowboard[y, x] for x in t), axis = 0)
+                if np.sum(union) == tupleSize and False not in [np.any(rowboard[y,x]) for x in t]:
+                    mask = np.logical_not(union)
+                    for x in range(dSize):
+                        if x not in t:
+                            bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+                rowboard = to_rowboard(dSize, bitboard)
+
+        columnboard = to_columnboard(dSize, bitboard)
+        for x in range(dSize):
+            cellCounts = np.sum(columnboard[x], axis=1)
+            blips = np.where(((cellCounts <= tupleSize) & (cellCounts > 0)))
+            
+            for t in itertools.combinations(blips, tupleSize):
+                union = np.any(tuple(columnboard[x, y] for y in t), axis = 0)
+                if np.sum(union) == tupleSize and False not in [np.any(columnboard[x,y]) for y in t]:
+                    mask = np.logical_not(union)
+                    for y in range(dSize):
+                        if y not in t:
+                            bitboard[y*dSize+x] = np.logical_and(mask,bitboard[y*dSize+x])
+                columnboard = to_columnboard(dSize, bitboard)
+
+        blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+        for b in range(dSize):
+            cellCounts = np.sum(blockboard[b], axis=1)
+            blips = np.where(((cellCounts <= tupleSize) & (cellCounts > 0)))
+            for t in itertools.combinations(blips, tupleSize):
+                intersection = np.any(tuple(blockboard[b, n] for n in t), axis = 0)
+                if np.sum(intersection) == tupleSize and False not in [np.any(blockboard[b,n]) for n in t]:
+                    mask = np.logical_not(intersection)
+                    for n in range(dSize):
+                        if n not in t:
+                            index = nInfo._blockNeighbors[b, n]
+                            bitboard[index] = np.logical_and(mask, bitboard[index])
+                blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
+        if count > np.sum(bitboard):
+            return count - np.sum(bitboard)
+
+    return count - np.sum(bitboard)
+
 
 def hidden_tuples(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = 2#min(dSize//2 + 1, 4)
+    maxSize = 3#min(dSize//2 + 1, 4)
 
-
-    for tupleSize in range(2, maxSize):
+    for tupleSize in range(2, maxSize+1):
         
         rowboard = to_rowboard(dSize, bitboard)
         for y in range(dSize):
@@ -323,7 +373,7 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits]
+SOLVE_METHODS = [naked_singles, hidden_singles, naked_rewrite, hidden_tuples, pointing_digits]
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet
