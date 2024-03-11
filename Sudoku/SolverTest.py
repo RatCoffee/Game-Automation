@@ -24,6 +24,7 @@ for e, clueString in enumerate(puzzles):
     if e%size == size-1:
         times[e//size] = time.time() - start
         start = time.time()
+        print(e+1)
     
 print("run times:", times)
 print("solved: %s"%solved)

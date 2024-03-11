@@ -150,7 +150,7 @@ def hidden_singles(puzzle, dSize, nInfo, bitboard):
 ### Find naked tuples
 def naked_tuples(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = 5#min(dSize//2 + 1, 4)
+    maxSize = 2#min(dSize//2 + 1, 4)
 
     for tupleSize in range(2, 3):
         rowboard = to_rowboard(dSize, bitboard)
@@ -194,7 +194,7 @@ def naked_tuples(puzzle, dSize, nInfo, bitboard):
 
 def hidden_tuples(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = 5#min(dSize//2 + 1, 4)
+    maxSize = 2#min(dSize//2 + 1, 4)
 
 
     for tupleSize in range(2, maxSize):
@@ -324,7 +324,7 @@ def valid_solution(clueString, puzzle):
     return True
 
 SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits]
-#naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits
+#naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet
 def iter_solve(puzzle, dSize, nInfo):
