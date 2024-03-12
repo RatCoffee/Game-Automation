@@ -291,7 +291,7 @@ def box_line_redux(puzzle, dSize, nInfo, bitboard):
     columnboard = to_columnboard(dSize, bitboard)
     for x in range(dSize):
         for v in range(dSize):
-            ix = np.where(rowboard[x, :, v])[0]
+            ix = np.where(columnboard[x, :, v])[0]
             if len(np.unique(ix//bh)) == 1:
                 mask = np.array([i != v for i in range(dSize)])
                 b = ix[0]//bh * bh + x//bw
@@ -334,7 +334,7 @@ def valid_solution(clueString, puzzle):
     return True
 
 SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples,
-                 pointing_digits] #
+                 pointing_digits, box_line_redux] #
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet
@@ -385,6 +385,6 @@ if __name__ == "__main__":
         bboard = iter_solve(puzzle, dSize, nInfo)
         if not valid_solution(clueString, puzzle):
             print("Partial solution")
-        print(puzzle)
+        print(puzzle.reshape((9,9)))
         print("Run time:", time.time()-start)
         print ("="*80)
