@@ -149,7 +149,7 @@ def hidden_singles(puzzle, dSize, nInfo, bitboard):
 
 def naked_tuples(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = min(dSize//2, 2)
+    maxSize = min(dSize//2, 4)
 
     for tupleSize in range(2, maxSize+1):
         rowboard = to_rowboard(dSize, bitboard)
@@ -199,7 +199,7 @@ def naked_tuples(puzzle, dSize, nInfo, bitboard):
 
 def hidden_tuples(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
-    maxSize = min(dSize//2 + 1, 2)
+    maxSize = min(dSize//2 + 1, 4)
 
     for tupleSize in range(2, maxSize+1):
         
@@ -271,6 +271,7 @@ def pointing_digits(puzzle, dSize, nInfo, bitboard):
                 blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors)
     return count - np.sum(bitboard)
 
+# Find BLR
 def box_line_redux(puzzle, dSize, nInfo, bitboard):
     count = np.sum(bitboard)
     bw, bh = block_shape(dSize)
@@ -332,7 +333,8 @@ def valid_solution(clueString, puzzle):
             return False
     return True
 
-SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples]#, pointing_digits
+SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples,
+                 pointing_digits] #
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet
