@@ -303,9 +303,6 @@ def box_line_redux(puzzle, dSize, nInfo, bitboard):
     return count - np.sum(bitboard)
 
 #Algorithms TODO:
-#Box Line Reduction
-    #If, within a line, a specific digit can only be in one block
-    #that digit cannot be in that box for any other line
 ################################################################
 #X-Wing
 #Coloring
@@ -334,7 +331,7 @@ def valid_solution(clueString, puzzle):
     return True
 
 SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples,
-                 pointing_digits, box_line_redux] #
+                 pointing_digits, box_line_redux]
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet

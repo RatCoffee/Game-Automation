@@ -1,7 +1,7 @@
 from sudokusolver import *
 import time
 
-s = 1
+s = 0
 
 testSets = [('smallTest.txt', 20),
             ('midTest.txt', 100),
@@ -36,4 +36,3 @@ print("run times:", times)
 print("solved: %s"%solved)
 print("total runtime:", sum(times))
 input()
-
