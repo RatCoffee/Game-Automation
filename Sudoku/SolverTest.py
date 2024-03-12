@@ -1,9 +1,15 @@
 from sudokusolver import *
 import time
 
-size = 20
+s = 2
 
-puzzles = [line.strip() for line in open("smallTest.txt", 'r').readlines()]
+testSets = [('smallTest.txt', 20),
+            ('midTest.txt', 100),
+            ('example.txt', 1000)]
+
+filename, size = testSets[s]
+
+puzzles = [line.strip() for line in open(filename, 'r').readlines()]
 
 dSize = 0
 solved = [0] * math.ceil(len(puzzles)/size)
@@ -30,9 +36,3 @@ print("run times:", times)
 print("solved: %s"%solved)
 print("total runtime:", sum(times))
 input()
-
-# depth 2 Pre optimization:  93.023 sec
-# depth 3 Pre optimization: 383.154 sec
-
-# depth 2 naked optimization:  15.053 sec
-# depth 3 naked optimization:  53.037 sec
