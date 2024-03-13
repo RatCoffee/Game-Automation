@@ -9,7 +9,7 @@ testSets = [('smallTest.txt', 20),
 
 filename, size = testSets[s]
 
-puzzles = [line.strip() for line in open(filename, 'r').readlines()]
+puzzles = [line.strip() for line in open(filename, 'r').readlines()][:4000]
 
 dSize = 0
 solved = [0] * math.ceil(len(puzzles)/size)
@@ -27,6 +27,9 @@ for e, clueString in enumerate(puzzles):
     bboard = iter_solve(puzzle, dSize, nInfo)
     if valid_solution(clueString, puzzle):
         solved[e//size] += 1
+    else:
+        print(e)
+        print(puzzle_from_string(clueString).reshape((dSize, dSize)))
     if e%size == size-1:
         times[e//size] = time.time() - start
         start = time.time()

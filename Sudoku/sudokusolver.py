@@ -85,6 +85,11 @@ def to_blockboard(dSize, bitboard, blockmap):
     return np.array([np.concatenate(tuple([bitboard[i:i+1,:]for i in block]))
                      for block in blockmap])
 
+#block, inblock, val
+def to_houseboard(dSize, bitboard, housemap):
+    return np.array([np.concatenate(tuple([bitboard[i:i+1,:]for i in block]))
+                     for block in housemap])
+
 # PUZZLE IMPORT
 ################################################################################
 # Import a puzzle from a simple clue string
@@ -338,6 +343,20 @@ def x_wing(puzzle, dSize, nInfo, bitboard):
     return count - np.sum(bitboard)
 
 #Coloring
+def basic_coloring(puzzle, dSize, nInfo, bitboard):
+    count = np.sum(bitboard)
+    rowboard = to_rowboard(dSize, bitboard)
+    columnboard = to_columnboard(dSize, bitboard)
+    blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors) 
+    for v in range(dSize):
+        colors = 
+        rowSpots = np.sum(rowboard[:,:,v], axis = 1)
+        columnSpots = np.sum(columnboard[:,:,v], axis = 1)
+        blockSpots = np.sum(blockboard[:,:,v], axis = 1)
+        print(columnSpots)
+        print()
+    return count - np.sum(bitboard)
+
 #Y-Wing
 #Rectangle Elimination
 #Swordfish
@@ -364,7 +383,7 @@ def valid_solution(clueString, puzzle):
     return True
 
 SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples,
-                 pointing_digits, box_line_redux, x_wing]
+                 pointing_digits, box_line_redux, x_wing, basic_coloring]
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet
