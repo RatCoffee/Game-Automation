@@ -20,6 +20,7 @@ def block_shape(dSize):
         h -= 1
     return (dSize//h, h)
 
+# TODO: Refactor so weird row configurations are possible
 
 # NEIGHBOR DETECTION
 ################################################################################
@@ -93,7 +94,7 @@ def puzzle_from_string(cluestring):
 # TODO: Handling of other methods of import
 # TODO: Non-Regular puzzle shapes
 
-# PUZZLE SOLVE
+# SIMPLE ALGORITHMS
 ################################################################################
 # Update the bitboard focusing on a specific square
 def update_square(index, puzzle, dSize, nInfo, bitboard):
@@ -302,15 +303,47 @@ def box_line_redux(puzzle, dSize, nInfo, bitboard):
     
     return count - np.sum(bitboard)
 
-#Algorithms TODO:
-################################################################
+
+# ADVANCED ALGORITHMS
+################################################################################
 #X-Wing
+def x_wing(puzzle, dSize, nInfo, bitboard):
+    count = np.sum(bitboard)
+    rowboard = to_rowboard(dSize, bitboard)
+    columnboard = to_columnboard(dSize, bitboard)
+    for v in range(dSize):
+        rowValCounts = np.sum(rowboard[:,:,v], axis = 1)
+        rowblips = np.where(rowValCounts == 2)[0]
+        for t in itertools.combinations(rowblips, 2):
+            union = np.any(tuple(rowboard[y,:,v] for y in t), axis = 0)
+            if np.sum(union) == 2:
+                elimCols = np.where(union)[0]
+                for y in range(dSize):
+                    if y not in t:
+                        for x in elimCols:
+                            index = y * dSize + x
+                            bitboard[index, v] = False
+        
+        colValCounts = np.sum(columnboard[:,:,v], axis = 1)
+        colblips = np.where(colValCounts == 2)[0]
+        for t in itertools.combinations(colblips, 2):
+            union = np.any(tuple(columnboard[x,:,v] for x in t), axis = 0)
+            if np.sum(union) == 2:
+                elimRows = np.where(union)[0]
+                for x in range(dSize):
+                    if x not in t:
+                        for y in elimRows:
+                            index = y * dSize + x
+                            bitboard[index, v] = False
+    return count - np.sum(bitboard)
+
 #Coloring
 #Y-Wing
 #Rectangle Elimination
 #Swordfish
 #XYZ-Wing
 #BUG
+
 
 # Determine if the puzzle has been solved
 def is_solved(puzzle):
@@ -331,7 +364,7 @@ def valid_solution(clueString, puzzle):
     return True
 
 SOLVE_METHODS = [naked_singles, hidden_singles, naked_tuples, hidden_tuples,
-                 pointing_digits, box_line_redux]
+                 pointing_digits, box_line_redux, x_wing]
 #naked_singles, hidden_singles, naked_tuples, hidden_tuples, pointing_digits, box_line_redux
 
 # Iteratively solve the puzzlet
@@ -357,6 +390,9 @@ if __name__ == "__main__":
     puzzles = [
 ("Easy",
 '000000000000003085001020000000507000004000100090000000500000073002010000000040009'
+ ),
+("X_Wing",
+'100000569402000008050009040000640801000010000208035000040500010900000402621000005'
  ),
 ("Medium",
 '100070009008096300050000020010000000940060072000000040030000080004720100200050003'

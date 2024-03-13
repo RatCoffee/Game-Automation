@@ -1,7 +1,7 @@
 from sudokusolver import *
 import time
 
-s = 0
+s = 2
 
 testSets = [('smallTest.txt', 20),
             ('midTest.txt', 100),
