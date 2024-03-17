@@ -85,11 +85,6 @@ def to_blockboard(dSize, bitboard, blockmap):
     return np.array([np.concatenate(tuple([bitboard[i:i+1,:]for i in block]))
                      for block in blockmap])
 
-#block, inblock, val
-def to_houseboard(dSize, bitboard, housemap):
-    return np.array([np.concatenate(tuple([bitboard[i:i+1,:]for i in block]))
-                     for block in housemap])
-
 # PUZZLE IMPORT
 ################################################################################
 # Import a puzzle from a simple clue string
@@ -349,7 +344,7 @@ def basic_coloring(puzzle, dSize, nInfo, bitboard):
     columnboard = to_columnboard(dSize, bitboard)
     blockboard = to_blockboard(dSize, bitboard, nInfo._blockNeighbors) 
     for v in range(dSize):
-        colors = 
+        colors = rowboard[:,:,v]
         rowSpots = np.sum(rowboard[:,:,v], axis = 1)
         columnSpots = np.sum(columnboard[:,:,v], axis = 1)
         blockSpots = np.sum(blockboard[:,:,v], axis = 1)
@@ -365,10 +360,13 @@ def basic_coloring(puzzle, dSize, nInfo, bitboard):
 
 
 # Determine if the puzzle has been solved
-def is_solved(puzzle):
-    return 0 not in puzzle
+def has_contradiction(puzzle, bitboard):
+    for i in range(len(puzzle)):
+        if puzzle[i] == 0 and not np.any(bitboard[i,:]):
+            return True
+    return False
 
-#TODO: Verify Solution as Valid
+# Verify Solution as Valid
 def valid_solution(clueString, puzzle):
     refPuzzle = puzzle_from_string(clueString)
 
