@@ -12,12 +12,15 @@ import re
 ################################################################################
 # Import a puzzle from a simple clue string
 def puzzle_from_string(cluestring):
-    if '#' in cluestring:
-        
-    else:
-        puzzle =  np.array([int(s) if s<='9' else
-                            int.from_bytes(s.encode())-87 for s in cluestring])
-        dSize = math.isqrt(len(puzzle))
+    # Get special format
+    f = re.match(r'\[.*\]', cluestring)
+    if f:
+        f = f.group()[1:-1]
+
+    # TODO: Cagemap for Jigsaw Sudoku
+    puzzle =  np.array([int(s) if s<='9' else
+                        int.from_bytes(s.encode())-87 for s in cluestring])
+    dSize = math.isqrt(len(puzzle))
 
     return puzzle, dSize
 # TODO: Handling of other methods of import
@@ -115,3 +118,7 @@ def to_blockboard(dSize, bitboard, blockmap):
 def to_houseboard(dSize, bitboard, housemap):
     return np.array([np.concatenate(tuple([bitboard[i:i+1,:]for i in block]))
                      for block in housemap])
+
+
+if __name__ == "__main__":
+    print(puzzle_from_string('[bfly]1000020000300004'))
